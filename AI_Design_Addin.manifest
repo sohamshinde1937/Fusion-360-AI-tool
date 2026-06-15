@@ -1,0 +1,10 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "addin",
+  "author": "AI Design Addin",
+  "description": "Generate 3D designs from natural language prompts using Groq AI (Free)",
+  "supportedOS": "windows|mac",
+  "productInterface": "CAM, CAMComp, Design, Drawing, FusionComp, Generative, PCBDesign, Render, Simulation",
+  "version": "1.0.0",
+  "runOnStartup": false
+}
