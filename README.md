@@ -1,18 +1,19 @@
-# AI 3D Designer for Fusion 360 🤖✨
+# AI 3D Designer Pro 🤖🛠️
 
-Turn plain English into 3D models — right inside Autodesk Fusion 360.
+An advanced AI-powered add-in for Autodesk Fusion 360 that turns natural language design descriptions into real, multi-part 3D models — including complex assemblies like quadcopter drones.
 
-This add-in lets you type a description like *"a cylinder 20mm radius and 40mm height"* or *"a 50x30x20mm box with a 10mm hole through the center"*, and it uses [Groq](https://groq.com/) (free, ultra-fast LLM inference) to generate and execute the Fusion 360 Python API code on the spot.
+This is the **Pro** version, built on top of a helper-function framework that lets the AI compose primitives (boxes, cylinders, cuts, copies, rotations) into structured assemblies, instead of writing raw, error-prone Fusion 360 API calls.
 
 ---
 
 ## ✨ Features
 
-- 🗣️ **Natural language to CAD** — describe what you want, get a 3D model
+- 🗣️ **Natural language → 3D assembly** — describe a design with dimensions in mm and get a working model
+- 🧩 **Helper-function framework** — AI composes designs using safe, pre-built functions (`make_box`, `make_cylinder`, `cut_cylinder`, `move_body`, `rotate_body`, `copy_and_rotate`, etc.)
+- 🎛️ **Complexity selector** — choose Simple, Medium, or Complex (full assembly) generation modes
 - ⚡ **Powered by Groq** — fast, free-tier LLM inference (`llama-3.3-70b-versatile`)
-- 🧩 **Seamless integration** — adds a button directly to the **SOLID → CREATE** panel
-- 🔍 **Transparent** — shows you the generated Python code after every run
-- 🆓 **No paid API required** — works with Groq's free API tier
+- 🚁 **Built-in drone example** — the AI is primed with a full quadcopter drone build pattern (center plate, arms, motor mounts)
+- 🔍 **Transparent** — shows the generated code after every run
 
 ---
 
@@ -39,25 +40,23 @@ This add-in lets you type a description like *"a cylinder 20mm radius and 40mm h
    - **macOS:**
      `~/Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns`
 
-3. **Copy the project folder** (containing `AI_Design_Addin.py`, `AI_Design_Addin.manifest`, and `commands.py`) into the `AddIns` folder above.
+3. **Copy the project folder** (containing `AI_Design_Pro.py`, `AI_Design_Pro.manifest`, and `commands.py`) into the `AddIns` folder above.
 
 4. **Add your Groq API key** — open `commands.py` and replace:
 
    ```python
-   GROQ_API_KEY = "enter you API key here"
+   GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE"
    ```
 
-   with your actual key from [console.groq.com/keys](https://console.groq.com/keys):
+   with your actual key from [console.groq.com/keys](https://console.groq.com/keys).
 
-   ```python
-   GROQ_API_KEY = "gsk_your_actual_key_here"
-   ```
+   > ⚠️ **Never commit your real API key to a public repo.** Keep this file untracked or use a separate config file once your key is added.
 
 5. **Load the add-in in Fusion 360**
 
    - Open Fusion 360
    - Go to **Utilities → Add-Ins → Scripts and Add-Ins** (or press `Shift + S`)
-   - Under the **Add-Ins** tab, find **AI_Design_Addin**
+   - Under the **Add-Ins** tab, find **AI_Design_Pro**
    - Click **Run** (optionally check **Run on Startup**)
 
 ---
@@ -66,14 +65,36 @@ This add-in lets you type a description like *"a cylinder 20mm radius and 40mm h
 
 1. Switch to the **Design** workspace
 2. Go to the **SOLID** tab → **CREATE** panel
-3. Click **AI 3D Designer**
-4. Type a description of the object you want, e.g.:
-   - `a box 50mm x 30mm x 20mm`
-   - `a cylinder with radius 20mm and height 40mm`
-   - `a 60mm cube with a 15mm hole through the top`
-5. Click **OK** and watch it appear in the design
+3. Click **AI 3D Designer Pro**
+4. Enter a design prompt with dimensions in **mm**, e.g.:
+   - `a 60mm cube with a 20mm hole through the center`
+   - `a cylinder 40mm radius and 80mm height with a 10mm hole through it`
+   - `a quadcopter drone with a 200mm body, 120mm arms, and 30mm motor mounts`
+5. Select a **Complexity** level:
+   - **Simple** – single body
+   - **Medium** – multiple bodies
+   - **Complex** – full assembly (e.g. drone)
+6. Click **OK**
 
-A dialog will show the generated code so you can review or reuse it.
+A dialog will show the generated code after the model is built.
+
+---
+
+## 🧠 How It Works
+
+Instead of letting the AI write raw, error-prone Fusion 360 API calls, this add-in injects a library of **helper functions** into the execution environment. The AI is instructed to compose designs using only these functions:
+
+| Function | Description |
+|---|---|
+| `make_box(root, cx, cy, cz, w, h, d, join_body=None)` | Creates a box centered at (cx, cy), starting at height cz |
+| `make_cylinder(root, cx, cy, cz, radius, height)` | Creates a cylinder at (cx, cy), starting at height cz |
+| `cut_cylinder(root, cx, cy, radius, height)` | Cuts a cylindrical hole through existing bodies |
+| `cut_box(root, cx, cy, w, h, depth)` | Cuts a rectangular hole through existing bodies |
+| `move_body(root, body_index, dx, dy, dz)` | Moves a body by an offset |
+| `rotate_body(root, body_index, angle_deg, px, py, pz)` | Rotates a body around the Z axis |
+| `copy_and_rotate(root, body_index, angle_deg, px, py, pz)` | Copies a body and rotates the copy |
+
+All dimensions are handled in **centimeters internally** (the AI converts from mm), and `body_index` increments with each new body created — letting the AI reference earlier parts for copies, moves, and rotations.
 
 ---
 
@@ -88,26 +109,27 @@ A dialog will show the generated code so you can review or reuse it.
 
 ## ⚠️ Important Notes
 
-- **Keep your API key private.** Never commit your real API key to a public repository. Consider using an environment variable or a separate untracked config file for production use.
+- **Keep your API key private.** Never commit your real key to a public repository.
 - **Generated code is executed directly** via Python's `exec()`. Only use prompts you trust, and review the generated code shown in the result dialog.
-- Results depend on the quality of the AI model's response — complex or ambiguous prompts may produce unexpected geometry.
+- This version disables SSL certificate verification (`ssl.CERT_NONE`) for the Groq API request to work around Fusion 360's bundled Python environment. This reduces transport security — use with awareness, and consider replacing it with a proper certificate bundle if you need stronger guarantees.
+- Results depend on the AI model's interpretation of your prompt — be specific about dimensions and layout for best results.
 
 ---
 
 ## 🧰 Project Structure
 
 ```
-AI_Design_Addin/
-├── AI_Design_Addin.py        # Add-in entry point (run/stop)
-├── AI_Design_Addin.manifest  # Fusion 360 add-in manifest
-└── commands.py                # Core logic: UI, Groq API calls, code execution
+AI_Design_Pro/
+├── AI_Design_Pro.py        # Add-in entry point (run/stop)
+├── AI_Design_Pro.manifest   # Fusion 360 add-in manifest
+└── commands.py               # Core logic: UI, helper functions, Groq API calls, execution
 ```
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests, issue reports, and feature suggestions are welcome! Feel free to fork the repo and submit improvements.
+Pull requests, issue reports, and feature suggestions are welcome! Ideas for new helper functions (fillets, patterns, threads, etc.) are especially appreciated.
 
 ---
 
