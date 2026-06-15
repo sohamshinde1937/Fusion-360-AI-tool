@@ -50,7 +50,7 @@ This is the **Pro** version, built on top of a helper-function framework that le
 
    with your actual key from [console.groq.com/keys](https://console.groq.com/keys).
 
-   > ⚠️ **Never commit your real API key to a public repo.** Keep this file untracked or use a separate config file once your key is added.
+  
 
 5. **Load the add-in in Fusion 360**
 
