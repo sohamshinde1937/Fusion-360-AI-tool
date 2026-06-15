@@ -29,7 +29,7 @@ This add-in lets you type a description like *"a cylinder 20mm radius and 40mm h
 1. **Download or clone this repository**
 
    ```bash
-   git clone https://github.com/<your-username>/<your-repo>.git
+   git clone https://github.com/sohamshinde1937/Fusion-360-AI-tool.git
    ```
 
 2. **Locate your Fusion 360 Add-Ins folder**
