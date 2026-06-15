@@ -1,0 +1,10 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "addin",
+  "author": "AI Design Pro",
+  "description": "Advanced AI-powered 3D design generator with axis control and complex assembly support",
+  "supportedOS": "windows|mac",
+  "productInterface": "CAM, CAMComp, Design, Drawing, FusionComp, Generative, PCBDesign, Render, Simulation",
+  "version": "2.0.0",
+  "runOnStartup": false
+}
